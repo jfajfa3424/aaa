@@ -1,35 +1,53 @@
-# 图像分类训练过程图
+# Image classification training figures
 
-面向植物叶片病害 8 分类实验的一套论文风格训练图。全部为白底、1:1（2400×2400，300 dpi），图内含标题，指标互相自洽。
+Paper-style figure set for an 8-class leaf-disease classifier. Every figure is white-background, 1:1 (2400×2400, 300 dpi), with an **English title** on the image.
 
-## 实验设定（图中叙事）
+## Experiment story
 
-- **任务**：8 类叶片病害图像分类（健康 / 早疫病 / 晚疫病 / 叶斑病 / 白粉病 / 锈病 / 花叶病 / 细菌萎蔫）
-- **本文方法**：ResNet-50 + CBAM，AdamW，余弦退火 + Warmup，Mixup/CutMix，Label Smoothing
-- **训练**：100 epoch；测试集每类 200 张，共 1600 张
-- **最终结果**：总体准确率 **96.81%**（混淆矩阵对角和 1549 / 1600），与 Loss / Accuracy / 消融 / 最终指标一致
+- **Task**: 8-class leaf disease classification (Healthy / Early blight / Late blight / Leaf spot / Powdery mildew / Rust / Mosaic / Bacterial wilt)
+- **Proposed method**: ResNet-50 + CBAM, AdamW, cosine annealing with warmup, Mixup/CutMix, label smoothing
+- **Protocol**: 100 epochs; 200 test images per class (1600 total)
+- **Headline result**: **96.81%** overall accuracy (1549 / 1600), consistent across loss, accuracy, confusion matrix, and metric tables
 
-相近类别会有合理误判（早疫↔晚疫、叶斑↔锈病、白粉↔花叶），而不是接近 100% 的完美对角阵。
+Confusions are concentrated among visually similar classes (early ↔ late blight, leaf spot ↔ rust), not a perfect diagonal.
 
-## 图件列表
+## Figure list
 
-| 文件 | 内容 |
+### Core training set
+
+| File | Title on figure |
 | --- | --- |
-| `figures/01_loss_curve.png` | 训练 / 验证损失 |
-| `figures/02_accuracy_curve.png` | 训练 / 验证准确率 |
-| `figures/03_optimizer_comparison.png` | SGD / RMSprop / Adam / AdamW |
-| `figures/04_architecture_comparison.png` | 网络结构：准确率、F1、参数量 |
-| `figures/05_ablation_study.png` | 消融：CBAM → Mixup → Cosine Warmup → Label Smoothing |
-| `figures/06_data_augmentation.png` | 数据增强逐步叠加 |
-| `figures/07_lr_strategy.png` | 学习率策略的验证准确率 |
-| `figures/07b_lr_schedule_curve.png` | 学习率数值曲线（含 Warmup 区间） |
-| `figures/08_confusion_matrix.png` | 测试集混淆矩阵 |
-| `figures/09_final_metrics.png` | Accuracy / Precision / Recall / F1 |
-| `figures/10_per_class_metrics.png` | 各类别 Precision / Recall / F1 |
+| `figures/01_loss_curve.png` | Training and Validation Loss |
+| `figures/02_accuracy_curve.png` | Training and Validation Accuracy |
+| `figures/03_optimizer_comparison.png` | Optimizer Comparison on Validation Accuracy |
+| `figures/04_architecture_comparison.png` | Architecture Comparison |
+| `figures/05_ablation_study.png` | Ablation Study |
+| `figures/06_data_augmentation.png` | Data Augmentation Strategies |
+| `figures/07_lr_strategy.png` | Learning-Rate Schedule Comparison |
+| `figures/07b_lr_schedule_curve.png` | Learning Rate Schedules |
+| `figures/08_confusion_matrix.png` | Confusion Matrix on the Test Set |
+| `figures/09_final_metrics.png` | Final Performance Metrics |
+| `figures/10_per_class_metrics.png` | Per-class Precision / Recall / F1 |
 
-相对常见的 9 张结果图，额外增加了学习率调度曲线和逐类指标，便于和混淆矩阵对照。
+### Advanced set (thesis / review)
 
-## 重新生成
+| File | Title on figure |
+| --- | --- |
+| `figures/11_roc_auc.png` | ROC Curves (One-vs-Rest) |
+| `figures/12_pr_curve.png` | Precision–Recall Curves |
+| `figures/13_tsne_features.png` | t-SNE of Deep Features |
+| `figures/14_radar_metrics.png` | Multi-Metric Radar Comparison |
+| `figures/15_kfold_cv.png` | Five-Fold Cross-Validation |
+| `figures/16_efficiency_scatter.png` | Accuracy vs. Model Complexity |
+| `figures/17_confusion_normalized.png` | Normalized Confusion Matrix |
+| `figures/18_hyperparam_heatmap.png` | Hyperparameter Sensitivity |
+| `figures/19_seed_std_band.png` | Validation Accuracy with 3-Seed Std. |
+| `figures/20_network_architecture.png` | Architecture of the Proposed Network |
+| `figures/21_gradcam.png` | Grad-CAM Visualization |
+| `figures/22_robustness.png` | Robustness to Gaussian Noise |
+| `figures/23_pipeline.png` | Training and Evaluation Pipeline |
+
+## Regenerate
 
 ```bash
 pip install -r requirements.txt

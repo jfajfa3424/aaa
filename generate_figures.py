@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Generate a coherent IEEE/Chinese-journal style figure series for image classification.
+"""Generate a coherent IEEE-style figure series for image classification.
 
 The proposed model (ResNet-50 + CBAM, AdamW, cosine annealing with warmup,
 Mixup/CutMix, label smoothing) reaches 96.81% overall accuracy (1549/1600),
 which matches the confusion matrix and metric tables.
+
+All on-figure text is English.
 """
 
 from __future__ import annotations
@@ -12,8 +14,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib import font_manager, patheffects
-from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+from matplotlib.patches import FancyBboxPatch
 from matplotlib.ticker import MultipleLocator
 
 # ---------------------------------------------------------------------------
@@ -25,9 +26,7 @@ OUT = ROOT / "figures"
 SIZE = 8.0  # inches → 1:1
 DPI = 300  # 2400 × 2400 px
 
-FONT_PATH = "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc"
-font_manager.fontManager.addfont(FONT_PATH)
-FONT_NAME = font_manager.FontProperties(fname=FONT_PATH).get_name()
+FONT_NAME = "DejaVu Sans"
 
 # Academic palette (colorblind-friendly, print-safe)
 C_TRAIN = "#2166ac"
@@ -82,6 +81,7 @@ def configure_style() -> None:
     plt.rcParams.update(
         {
             "font.family": FONT_NAME,
+            "font.sans-serif": ["DejaVu Sans", "Liberation Sans", "Arial"],
             "font.size": 12,
             "axes.unicode_minus": False,
             "axes.linewidth": 1.05,
@@ -108,9 +108,7 @@ def configure_style() -> None:
 
 
 def add_title(fig, title: str) -> None:
-    """CJK fonts often lack a true bold face; a light stroke approximates bold."""
-    txt = fig.suptitle(title, fontsize=18, color=C_TEXT, y=0.955)
-    txt.set_path_effects([patheffects.withStroke(linewidth=0.55, foreground=C_TEXT)])
+    fig.suptitle(title, fontsize=18, fontweight="bold", color=C_TEXT, y=0.955, fontfamily="DejaVu Sans")
 
 
 def new_figure(title: str):

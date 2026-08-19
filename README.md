@@ -1,48 +1,50 @@
-# 知识图谱训练过程图
+# Knowledge graph training figures
 
-面向链接预测（Link Prediction）论文/报告的一组 **白底、1:1、300 dpi** 训练过程图。数值按 FB15k-237 量级设定：提出方法 CompGCN-Attn（图中 **Ours**）略优于 CompGCN / RotatE，增益幅度与公开文献一致，避免“完美到不可信”。
+Paper-style **white-background, 1:1, 300 dpi** figures for a link-prediction study. Numbers follow an FB15k-237-scale setup: the proposed CompGCN-Attn model (**Ours**) slightly outperforms CompGCN / RotatE, with a realistic margin.
 
-## 快速生成
+Figure titles are in English.
+
+## Generate
 
 ```bash
 pip install -r requirements.txt
 python scripts/generate_kg_figures.py
 ```
 
-输出在 `figures/`（PNG + PDF）。PNG 为 **2400×2400** 不透明白底，可直接插入 Word / WPS / LaTeX。
+Outputs go to `figures/` (PNG + PDF). PNGs are **2400×2400** opaque white and can be inserted into Word / WPS / LaTeX.
 
-## 实验设定（图中叙事）
+## Experimental setup (narrative used in the figures)
 
-| 项 | 设定 |
+| Item | Setting |
 | --- | --- |
-| 任务 | 过滤设定下的链接预测 + 关系分类辅助指标 |
-| 数据规模 | 对齐 FB15k-237（约 1.4 万实体 / 237 关系） |
-| 提出模型 | CompGCN + 关系注意力（Ours） |
-| 训练 | 80 epoch，早停于 68；AdamW；warmup + cosine；嵌入维 256；负采样 k=64 |
-| 主指标 | MRR、Hits@1/3/10（filtered） |
+| Task | Filtered link prediction + relation classification |
+| Data scale | FB15k-237-like (~14.5k entities / 237 relations) |
+| Proposed model | CompGCN + relation attention (Ours) |
+| Training | 80 epochs, early stop at 68; AdamW; warmup + cosine; dim 256; k=64 negatives |
+| Main metrics | MRR, Hits@1/3/10 (filtered) |
 
-## 图目录
+## Figure index
 
-| 文件 | 标题 | 说明 |
+| File | Title | Notes |
 | --- | --- | --- |
-| `fig01_loss_curve` | 训练与验证损失曲线 | 自对抗排序损失，训练/验证同步下降，间隙稳定 |
-| `fig02_accuracy_curve` | 验证集准确率与排序指标曲线 | 关系分类 Accuracy + Hits@10 / Hits@1 |
-| `fig03_optimizer_comparison` | 不同优化器的验证 MRR 对比 | AdamW > Adam > RMSProp > SGD+M |
-| `fig04_architecture_comparison` | 知识图谱嵌入模型性能对比 | TransE … CompGCN vs Ours |
-| `fig05_ablation` | 消融实验结果 | 注意力、关系组合、逆关系等 |
-| `fig06_data_augmentation` | 数据增强策略的影响 | 逆三元组、dropout、自对抗负采样 |
-| `fig07_lr_strategy` | 学习率策略对比 | 主图为 MRR，角标为学习率形状 |
-| `fig08_confusion_matrix` | 关系分类混淆矩阵 | 相近关系（LocatedIn/CapitalOf 等）有合理混淆 |
-| `fig09_final_metrics` | 链接预测最终评测指标 | 列内归一化着色，数字为真实指标 |
-| `fig10_embedding_dim` | 嵌入维度敏感性分析 | 256 最优，1024 略降（过拟合） |
-| `fig11_negative_sampling` | 负采样数量的影响 | k=64 最优，过大略降 |
-| `fig12_per_relation` | 分关系 Hits@10 对比 | Ours 在各类关系上均高于 CompGCN |
+| `fig01_loss_curve` | Training and Validation Loss | Self-adversarial ranking loss; stable train/val gap |
+| `fig02_accuracy_curve` | Validation Accuracy and Ranking Metrics | Relation-class accuracy + Hits@10 / Hits@1 |
+| `fig03_optimizer_comparison` | Optimizer Comparison on Validation MRR | AdamW > Adam > RMSProp > SGD+M |
+| `fig04_architecture_comparison` | Knowledge Graph Embedding Comparison | TransE … CompGCN vs Ours |
+| `fig05_ablation` | Ablation Study | Attention, relation composition, inverse relations |
+| `fig06_data_augmentation` | Effect of Data Augmentation | Inverse triples, dropout, self-adversarial negatives |
+| `fig07_lr_strategy` | Learning-Rate Strategy Comparison | MRR curves with LR-schedule inset |
+| `fig08_confusion_matrix` | Relation Classification Confusion Matrix | Plausible mix-ups (LocatedIn/CapitalOf, etc.) |
+| `fig09_final_metrics` | Final Link-Prediction Metrics | Column-normalized color; cells show true scores |
+| `fig10_embedding_dim` | Embedding Dimension Sensitivity | Best at 256; slight drop at 1024 |
+| `fig11_negative_sampling` | Negative Sampling Size | Best at k=64 |
+| `fig12_per_relation` | Per-Relation Hits@10 | Ours above CompGCN on every relation |
 
-`fig10`–`fig12` 是比“准确率曲线”更符合知识图谱论文习惯的补充图，写实验章节时可直接使用。
+`fig10`–`fig12` are extra figures that fit a typical KG paper better than another generic accuracy plot.
 
-## 风格约定
+## Style
 
-- 画布 8×8 inch，300 dpi，1:1
-- 白底、去上/右边框、浅灰水平网格
-- 同一套配色：蓝 / 橙 / 提出方法用砖红突出
-- 条形图含 3-run 误差棒，曲线为带衰减的 AR(1) 噪声，避免“过于光滑”
+- 8×8 inch canvas, 300 dpi, 1:1
+- White background, no top/right spines, light gray y-grid
+- Shared palette: blue / orange, proposed method in brick red
+- Bar charts include 3-run error bars; curves use decaying AR(1) noise

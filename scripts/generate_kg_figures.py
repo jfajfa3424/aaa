@@ -78,7 +78,7 @@ def apply_style() -> None:
     plt.rcParams.update(
         {
             "font.family": "sans-serif",
-            "font.sans-serif": ["WenQuanYi Micro Hei", "Droid Sans Fallback", "DejaVu Sans"],
+            "font.sans-serif": ["Liberation Sans", "Noto Sans", "DejaVu Sans", "Arial"],
             "axes.unicode_minus": False,
             "figure.facecolor": "white",
             "axes.facecolor": "white",
@@ -185,7 +185,7 @@ def fig_loss() -> None:
     ax.plot(x, val, color=ORANGE, lw=2.0, label="Validation loss")
     mark_early_stop(ax)
     style_ax(ax)
-    ax.set_title("训练与验证损失曲线", pad=12, color=INK)
+    ax.set_title("Training and Validation Loss", pad=12, color=INK)
     ax.set_xlabel("Epoch")
     ax.set_ylabel("Self-adversarial ranking loss")
     ax.set_xlim(1, EPOCHS)
@@ -211,7 +211,7 @@ def fig_accuracy() -> None:
     ax.plot(x, hits1, color=ORANGE, lw=2.0, label="Hits@1")
     mark_early_stop(ax)
     style_ax(ax)
-    ax.set_title("验证集准确率与排序指标曲线", pad=12, color=INK)
+    ax.set_title("Validation Accuracy and Ranking Metrics", pad=12, color=INK)
     ax.set_xlabel("Epoch")
     ax.set_ylabel("Score")
     ax.set_xlim(1, EPOCHS)
@@ -245,7 +245,7 @@ def fig_optimizer() -> None:
         lw = 2.3 if name == "AdamW" else 1.8
         ax.plot(x, y, color=c, lw=lw, label=name, zorder=4 if name == "AdamW" else 3)
     style_ax(ax)
-    ax.set_title("不同优化器的验证 MRR 对比", pad=12, color=INK)
+    ax.set_title("Optimizer Comparison on Validation MRR", pad=12, color=INK)
     ax.set_xlabel("Epoch")
     ax.set_ylabel("MRR")
     ax.set_xlim(1, EPOCHS)
@@ -300,7 +300,7 @@ def fig_architecture() -> None:
     bars2[-1].set_color("#D08A3A")
     bars1[-1].set_hatch("")
     style_ax(ax)
-    ax.set_title("知识图谱嵌入模型性能对比", pad=12, color=INK)
+    ax.set_title("Knowledge Graph Embedding Comparison", pad=12, color=INK)
     ax.set_ylabel("Filtered score")
     ax.set_xticks(x, names, rotation=28, ha="right")
     ax.set_ylim(0.0, 0.70)
@@ -352,7 +352,7 @@ def fig_ablation() -> None:
         zorder=3,
     )
     style_ax(ax, grid_axis="x")
-    ax.set_title("消融实验结果", pad=12, color=INK)
+    ax.set_title("Ablation Study", pad=12, color=INK)
     ax.set_xlabel("Filtered score")
     ax.set_yticks(y, labels)
     ax.set_xlim(0.25, 0.62)
@@ -408,7 +408,7 @@ def fig_augmentation() -> None:
         zorder=3,
     )
     style_ax(ax)
-    ax.set_title("数据增强策略的影响", pad=12, color=INK)
+    ax.set_title("Effect of Data Augmentation", pad=12, color=INK)
     ax.set_ylabel("Filtered score")
     ax.set_xticks(x, names)
     ax.set_ylim(0.28, 0.62)
@@ -448,7 +448,7 @@ def fig_lr_strategy() -> None:
     axins.plot(x, lr_cos, color=BLUE, lw=1.1)
     axins.plot(x, lr_step, color=ORANGE, lw=1.1)
     axins.plot(x, lr_const, color=GRAY, lw=1.0)
-    axins.set_title("学习率变化", fontsize=8, pad=3, color="#555555")
+    axins.set_title("LR schedule", fontsize=8, pad=3, color="#555555")
     axins.set_xticks([])
     axins.set_yticks([])
     axins.set_xlim(1, EPOCHS)
@@ -459,7 +459,7 @@ def fig_lr_strategy() -> None:
     axins.set_facecolor("#FAFAFA")
 
     style_ax(ax)
-    ax.set_title("学习率策略对比", pad=12, color=INK)
+    ax.set_title("Learning-Rate Strategy Comparison", pad=12, color=INK)
     ax.set_xlabel("Epoch")
     ax.set_ylabel("Validation MRR")
     ax.set_xlim(1, EPOCHS)
@@ -521,7 +521,7 @@ def fig_confusion() -> None:
     )
     for text, nv in zip(hm.texts, cm_norm.ravel()):
         text.set_color("white" if nv >= 0.55 else INK)
-    ax.set_title("关系分类混淆矩阵", pad=12, color=INK)
+    ax.set_title("Relation Classification Confusion Matrix", pad=12, color=INK)
     ax.set_xlabel("Predicted relation")
     ax.set_ylabel("True relation")
     ax.tick_params(axis="x", rotation=35, length=0)
@@ -579,7 +579,7 @@ def fig_final_metrics() -> None:
             clip_on=False,
         )
     )
-    ax.set_title("链接预测最终评测指标", pad=12, color=INK)
+    ax.set_title("Final Link-Prediction Metrics", pad=12, color=INK)
     ax.set_xlabel("Metric")
     ax.set_ylabel("Model")
     ax.tick_params(length=0)
@@ -624,7 +624,7 @@ def fig_embedding_dim() -> None:
     ax.axvline(256, color="#B0B0B0", ls="--", lw=1.0)
     ax.text(256 + 18, 0.575, "selected dim = 256", color="#888888", fontsize=9, va="top")
     style_ax(ax)
-    ax.set_title("嵌入维度敏感性分析", pad=12, color=INK)
+    ax.set_title("Embedding Dimension Sensitivity", pad=12, color=INK)
     ax.set_xlabel("Embedding dimension")
     ax.set_ylabel("Filtered score")
     ax.set_xscale("log", base=2)
@@ -648,7 +648,7 @@ def fig_neg_sampling() -> None:
     ax.axvline(64, color="#B0B0B0", ls="--", lw=1.0)
     ax.text(64 + 6, 0.575, "selected k = 64", color="#888888", fontsize=9, va="top")
     style_ax(ax)
-    ax.set_title("负采样数量的影响", pad=12, color=INK)
+    ax.set_title("Negative Sampling Size", pad=12, color=INK)
     ax.set_xlabel("Negatives per positive triple")
     ax.set_ylabel("Filtered score")
     ax.set_xscale("log", base=2)
@@ -684,7 +684,7 @@ def fig_per_relation() -> None:
     ax.barh(y + h / 2, ours, h, color=OURS, edgecolor="white", label="Ours", zorder=3)
     ax.barh(y - h / 2, base, h, color=BLUE_L, edgecolor="white", label="CompGCN", zorder=3)
     style_ax(ax, grid_axis="x")
-    ax.set_title("分关系 Hits@10 对比", pad=12, color=INK)
+    ax.set_title("Per-Relation Hits@10", pad=12, color=INK)
     ax.set_xlabel("Hits@10")
     ax.set_yticks(y, labels)
     ax.set_xlim(0.30, 0.80)

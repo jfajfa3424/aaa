@@ -39,8 +39,9 @@ Outputs go to `figures/` (PNG + PDF). PNGs are **2400×2400** opaque white and c
 | `fig10_embedding_dim` | Embedding Dimension Sensitivity | Best at 256; slight drop at 1024 |
 | `fig11_negative_sampling` | Negative Sampling Size | Best at k=64 |
 | `fig12_per_relation` | Per-Relation Hits@10 | Ours above CompGCN on every relation |
+| `fig13_kg_subgraph` | Predicted Entity–Relation Subgraph | Local typed subgraph; edge width = Hits@10 |
 
-`fig10`–`fig12` are extra figures that fit a typical KG paper better than another generic accuracy plot.
+`fig10`–`fig12` are extra figures that fit a typical KG paper better than another generic accuracy plot. `fig13` shows the graph structure itself (entities and relations), using the same relation set and Hits@10 as the training results.
 
 ## Style
 

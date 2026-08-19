@@ -14,9 +14,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.lines import Line2D
+from matplotlib.patches import FancyArrowPatch
 from matplotlib.ticker import MultipleLocator
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from PIL import Image
+import networkx as nx
 
 OUT_DIR = Path(__file__).resolve().parents[1] / "figures"
 SIZE = 8.0
@@ -24,7 +27,32 @@ DPI = 300
 EPOCHS = 80
 EARLY_STOP = 68
 
-# Academic, colorblind-friendly palette (consistent across all figures)
+# Per-relation Hits@10 of Ours — reused by the ablation-style bar chart
+# and by the subgraph visualization (edge width / line style).
+REL_HITS10 = {
+    "BornIn": 0.61,
+    "LocatedIn": 0.58,
+    "CapitalOf": 0.72,
+    "WorksAt": 0.54,
+    "MemberOf": 0.49,
+    "PartOf": 0.57,
+    "SpouseOf": 0.46,
+    "ParentOf": 0.51,
+    "WrittenBy": 0.66,
+    "DirectedBy": 0.63,
+}
+REL_HITS10_COMPGCN = {
+    "BornIn": 0.53,
+    "LocatedIn": 0.51,
+    "CapitalOf": 0.64,
+    "WorksAt": 0.47,
+    "MemberOf": 0.41,
+    "PartOf": 0.50,
+    "SpouseOf": 0.38,
+    "ParentOf": 0.43,
+    "WrittenBy": 0.58,
+    "DirectedBy": 0.55,
+}
 BLUE = "#2F5D8A"
 BLUE_L = "#6A93C4"
 ORANGE = "#D08A3A"
@@ -662,20 +690,9 @@ def fig_neg_sampling() -> None:
 # Fig 12  Per-relation Hits@10
 # ---------------------------------------------------------------------------
 def fig_per_relation() -> None:
-    labels = [
-        "BornIn",
-        "LocatedIn",
-        "CapitalOf",
-        "WorksAt",
-        "MemberOf",
-        "PartOf",
-        "SpouseOf",
-        "ParentOf",
-        "WrittenBy",
-        "DirectedBy",
-    ]
-    ours = np.array([0.61, 0.58, 0.72, 0.54, 0.49, 0.57, 0.46, 0.51, 0.66, 0.63])
-    base = np.array([0.53, 0.51, 0.64, 0.47, 0.41, 0.50, 0.38, 0.43, 0.58, 0.55])
+    labels = list(REL_HITS10.keys())
+    ours = np.array([REL_HITS10[k] for k in labels])
+    base = np.array([REL_HITS10_COMPGCN[k] for k in labels])
     y = np.arange(len(labels))[::-1]
 
     fig, ax = new_axes()
@@ -692,6 +709,234 @@ def fig_per_relation() -> None:
     save(fig, "fig12_per_relation")
 
 
+# ---------------------------------------------------------------------------
+# Fig 13  KG subgraph visualization (same relations / Hits@10 as training)
+# ---------------------------------------------------------------------------
+REL_GROUP = {
+    "BornIn": "geo",
+    "LocatedIn": "geo",
+    "CapitalOf": "geo",
+    "PartOf": "geo",
+    "WorksAt": "org",
+    "MemberOf": "org",
+    "SpouseOf": "family",
+    "ParentOf": "family",
+    "WrittenBy": "creative",
+    "DirectedBy": "creative",
+}
+REL_GROUP_COLOR = {
+    "geo": ORANGE,
+    "org": GREEN,
+    "family": OURS,
+    "creative": PURPLE,
+}
+NODE_TYPE_COLOR = {
+    "person": BLUE,
+    "location": ORANGE,
+    "org": GREEN,
+    "work": PURPLE,
+}
+
+
+def fig_kg_subgraph() -> None:
+    """Local directed subgraph using the trained model's relation set.
+
+    Edge width follows Ours Hits@10; dashed edges are lower-confidence
+    relations (Hits@10 < 0.55), matching fig12.
+    """
+    node_type = {
+        "Marie Curie": "person",
+        "Pierre Curie": "person",
+        "Irène Curie": "person",
+        "Alan Turing": "person",
+        "Ada Lovelace": "person",
+        "C. Nolan": "person",
+        "C. Dickens": "person",
+        "Warsaw": "location",
+        "Paris": "location",
+        "France": "location",
+        "London": "location",
+        "England": "location",
+        "Cambridge": "location",
+        "Portsmouth": "location",
+        "Cambridge Univ.": "org",
+        "Royal Society": "org",
+        "Inception": "work",
+        "Interstellar": "work",
+        "Two Cities": "work",
+    }
+    triples = [
+        ("Marie Curie", "BornIn", "Warsaw"),
+        ("Marie Curie", "SpouseOf", "Pierre Curie"),
+        ("Marie Curie", "ParentOf", "Irène Curie"),
+        ("Pierre Curie", "BornIn", "Paris"),
+        ("Irène Curie", "BornIn", "Paris"),
+        ("Paris", "CapitalOf", "France"),
+        ("Paris", "LocatedIn", "France"),
+        ("London", "CapitalOf", "England"),
+        ("Cambridge", "LocatedIn", "England"),
+        ("Portsmouth", "LocatedIn", "England"),
+        ("Alan Turing", "BornIn", "London"),
+        ("Alan Turing", "WorksAt", "Cambridge Univ."),
+        ("Alan Turing", "MemberOf", "Royal Society"),
+        ("Ada Lovelace", "BornIn", "London"),
+        ("Cambridge Univ.", "LocatedIn", "Cambridge"),
+        ("Royal Society", "LocatedIn", "London"),
+        ("C. Nolan", "BornIn", "London"),
+        ("Inception", "DirectedBy", "C. Nolan"),
+        ("Interstellar", "DirectedBy", "C. Nolan"),
+        ("Inception", "WrittenBy", "C. Nolan"),
+        ("Two Cities", "WrittenBy", "C. Dickens"),
+        ("C. Dickens", "BornIn", "Portsmouth"),
+    ]
+
+    G = nx.DiGraph()
+    for n, t in node_type.items():
+        G.add_node(n, ntype=t)
+    for h, r, t in triples:
+        G.add_edge(h, t, rel=r, hits=REL_HITS10[r])
+
+    # Manual layout: works at top, people in the middle, geo hierarchy at bottom.
+    pos = {
+        "Two Cities": np.array([-0.46, 0.80]),
+        "Inception": np.array([0.50, 0.84]),
+        "Interstellar": np.array([0.78, 0.64]),
+        "C. Dickens": np.array([-0.46, 0.50]),
+        "Marie Curie": np.array([-0.22, 0.26]),
+        "Pierre Curie": np.array([-0.50, 0.04]),
+        "Irène Curie": np.array([0.04, 0.04]),
+        "Ada Lovelace": np.array([0.06, 0.48]),
+        "Alan Turing": np.array([0.40, 0.16]),
+        "C. Nolan": np.array([0.64, 0.42]),
+        "Royal Society": np.array([0.20, -0.06]),
+        "Cambridge Univ.": np.array([0.58, -0.06]),
+        "Warsaw": np.array([-0.74, -0.10]),
+        "Paris": np.array([-0.28, -0.32]),
+        "France": np.array([-0.28, -0.68]),
+        "London": np.array([0.12, -0.36]),
+        "England": np.array([0.20, -0.72]),
+        "Cambridge": np.array([0.62, -0.32]),
+        "Portsmouth": np.array([-0.62, -0.48]),
+    }
+
+    fig, ax = new_axes()
+    fig.subplots_adjust(left=0.04, right=0.98, top=0.90, bottom=0.16)
+    ax.set_axis_off()
+
+    pair_count = {}
+    for h, t, data in G.edges(data=True):
+        key = (h, t)
+        pair_count[key] = pair_count.get(key, 0) + 1
+    pair_seen = {}
+    for h, t, data in G.edges(data=True):
+        rel = data["rel"]
+        hits = data["hits"]
+        color = REL_GROUP_COLOR[REL_GROUP[rel]]
+        lw = 0.9 + 4.2 * (hits - 0.44)
+        ls = (0, (3.2, 2.0)) if hits < 0.55 else "solid"
+        p0 = np.array(pos[h])
+        p1 = np.array(pos[t])
+        n_parallel = pair_count[(h, t)]
+        i_par = pair_seen.get((h, t), 0)
+        pair_seen[(h, t)] = i_par + 1
+        if n_parallel > 1:
+            rad = 0.18 if i_par == 0 else -0.14
+        else:
+            rad = 0.05
+        ax.add_patch(
+            FancyArrowPatch(
+                p0,
+                p1,
+                arrowstyle="-|>",
+                mutation_scale=9,
+                linewidth=lw,
+                linestyle=ls,
+                color=color,
+                connectionstyle=f"arc3,rad={rad}",
+                shrinkA=13,
+                shrinkB=15,
+                alpha=0.92,
+                zorder=1,
+            )
+        )
+
+    # Nodes
+    degrees = dict(G.degree())
+    for n, (x, y) in pos.items():
+        r = 0.028 + 0.007 * degrees[n]
+        circ = plt.Circle(
+            (x, y),
+            r,
+            facecolor=NODE_TYPE_COLOR[node_type[n]],
+            edgecolor="white",
+            linewidth=1.1,
+            zorder=3,
+        )
+        ax.add_patch(circ)
+
+    # Labels placed by entity type so they do not sit on the nodes
+    type_off = {
+        "person": (0.0, 0.072),
+        "location": (0.0, -0.078),
+        "org": (0.095, 0.0),
+        "work": (0.0, 0.075),
+    }
+    for n, (x, y) in pos.items():
+        dx, dy = type_off[node_type[n]]
+        ax.text(
+            x + dx,
+            y + dy,
+            n,
+            ha="center",
+            va="center",
+            fontsize=7.6,
+            color=INK,
+            zorder=4,
+        )
+
+    ax.set_xlim(-0.98, 1.02)
+    ax.set_ylim(-0.92, 1.02)
+    ax.set_aspect("equal", adjustable="box")
+
+    type_handles = [
+        Line2D([0], [0], marker="o", color="none", markerfacecolor=c, markeredgecolor="white",
+               markersize=8, label=lab)
+        for lab, c in [("Person", BLUE), ("Location", ORANGE), ("Organization", GREEN), ("Work", PURPLE)]
+    ]
+    rel_handles = [
+        Line2D([0], [0], color=c, lw=2.0, label=lab)
+        for lab, c in [
+            ("Geo (BornIn / LocatedIn / …)", ORANGE),
+            ("Org (WorksAt / MemberOf)", GREEN),
+            ("Family (SpouseOf / ParentOf)", OURS),
+            ("Creative (WrittenBy / DirectedBy)", PURPLE),
+        ]
+    ]
+    leg1 = ax.legend(
+        handles=type_handles,
+        loc="lower left",
+        bbox_to_anchor=(0.01, 0.01),
+        frameon=True,
+        title="Entity type",
+        fontsize=8,
+        title_fontsize=8.5,
+        borderpad=0.5,
+    )
+    ax.add_artist(leg1)
+    ax.legend(
+        handles=rel_handles,
+        loc="lower right",
+        bbox_to_anchor=(0.99, 0.01),
+        frameon=True,
+        title="Relation group  (width = Hits@10)",
+        fontsize=8,
+        title_fontsize=8.5,
+        borderpad=0.5,
+    )
+    ax.set_title("Predicted Entity–Relation Subgraph", pad=12, color=INK)
+    save(fig, "fig13_kg_subgraph")
+
+
 def main() -> None:
     apply_style()
     fig_loss()
@@ -706,6 +951,7 @@ def main() -> None:
     fig_embedding_dim()
     fig_neg_sampling()
     fig_per_relation()
+    fig_kg_subgraph()
     print(f"Wrote figures to {OUT_DIR}")
 
 

@@ -114,3 +114,14 @@ python -m leaf_disease.train --cifar10 --model resnet50 --img-size 32 --epochs 2
 | `figures/16_confusion_normalized.png` | Normalized Confusion Matrix | 测试 |
 
 `figures/04` 和 `figures/12` 最贴这条笔记：四条主干同框，MobileNet/EfficientNet 走效率，ResNet-50+CBAM 走精度。
+
+## 组合图（和论文示例一样拼在一张里）
+
+期刊常见的 **3×2、子图 (a)–(f)、四边黑框**，不再各自成张。
+
+| 文件 | 布局 | 内容 |
+| --- | --- | --- |
+| `figures/C1_training_3x2.png` | 3×2 | (a) Loss (b) Accuracy (c) 结构对比 (d) 混淆矩阵 (e) 消融 (f) 精度–参数量 |
+| `figures/C2_optimization_3x2.png` | 3×2 | (a) 优化器 (b) 学习率策略 (c) LR 曲线 (d) 增强 (e) 逐类指标 (f) ROC |
+| `figures/C3_evaluation_2x2.png` | 2×2 | (a) 最终指标 (b) 归一化混淆矩阵 (c) t-SNE (d) 逐类 P/R/F1 |
+| `figures/C4_metric_pairplot.png` | 5×5 | 训练指标两两散点 + 对角线分布 |

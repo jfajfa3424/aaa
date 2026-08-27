@@ -2,7 +2,8 @@
 
 **代码已在 CPU 上跑通。** 过程笔记、运行截图和最后一屏成功图见：
 
-- 笔记：[`NOTES.md`](NOTES.md)
+- 闲鱼发帖文案（标题 + 正文 + 主图顺序）：[`闲鱼笔记.md`](闲鱼笔记.md)
+- 跑通过程笔记：[`NOTES.md`](NOTES.md)
 - 本次真实跑通截图：[`run_shots/`](run_shots/)
 - 最后确认图：[`run_shots/08_success_final.png`](run_shots/08_success_final.png)、[`run_shots/09_dashboard_final.png`](run_shots/09_dashboard_final.png)、[`run_shots/11_success_illustration.png`](run_shots/11_success_illustration.png)
 

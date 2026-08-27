@@ -1,0 +1,222 @@
+{
+  "config": {
+    "data_dir": "data/leaf",
+    "output_dir": "outputs/demo",
+    "model": "tiny",
+    "epochs": 5,
+    "batch_size": 16,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "num_workers": 0,
+    "seed": 42,
+    "img_size": 64,
+    "pretrained": false,
+    "optimizer": "adamw",
+    "scheduler": "cosine_warmup",
+    "warmup_epochs": 10,
+    "label_smoothing": 0.1,
+    "mixup_alpha": 0.0,
+    "cutmix_alpha": 0.0,
+    "mixup_prob": 0.5,
+    "patience": 20,
+    "amp": false,
+    "demo": true,
+    "cifar10": false,
+    "demo_images_per_class": 48
+  },
+  "class_names": [
+    "Bacterial_wilt",
+    "Early_blight",
+    "Healthy",
+    "Late_blight",
+    "Leaf_spot",
+    "Mosaic",
+    "Powdery_mildew",
+    "Rust"
+  ],
+  "params": 94728,
+  "best_val_acc": 0.9285714285714286,
+  "history": {
+    "train_loss": [
+      1.8601588155284072,
+      1.4070579355413264,
+      1.1897611979282263,
+      1.057128451087258,
+      0.992878951809623
+    ],
+    "val_loss": [
+      1.8879144532339913,
+      1.3895863805498396,
+      1.159338116645813,
+      1.080532363482884,
+      0.9532129083360944
+    ],
+    "train_acc": [
+      0.375,
+      0.5946969696969697,
+      0.7765151515151515,
+      0.7916666666666666,
+      0.7916666666666666
+    ],
+    "val_acc": [
+      0.4642857142857143,
+      0.75,
+      0.8035714285714286,
+      0.875,
+      0.9285714285714286
+    ],
+    "lr": [
+      0.0002,
+      0.0003,
+      0.0004,
+      0.0005,
+      0.0006
+    ]
+  },
+  "test": {
+    "accuracy": 0.90625,
+    "macro_precision": 0.9154761904761906,
+    "macro_recall": 0.90625,
+    "macro_f1": 0.9055088702147526,
+    "per_class": {
+      "Bacterial_wilt": {
+        "precision": 0.8,
+        "recall": 1.0,
+        "f1": 0.888888888888889,
+        "support": 8
+      },
+      "Early_blight": {
+        "precision": 0.7777777777777778,
+        "recall": 0.875,
+        "f1": 0.823529411764706,
+        "support": 8
+      },
+      "Healthy": {
+        "precision": 0.8888888888888888,
+        "recall": 1.0,
+        "f1": 0.9411764705882353,
+        "support": 8
+      },
+      "Late_blight": {
+        "precision": 1.0,
+        "recall": 0.875,
+        "f1": 0.9333333333333333,
+        "support": 8
+      },
+      "Leaf_spot": {
+        "precision": 1.0,
+        "recall": 0.75,
+        "f1": 0.8571428571428571,
+        "support": 8
+      },
+      "Mosaic": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 8
+      },
+      "Powdery_mildew": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 8
+      },
+      "Rust": {
+        "precision": 0.8571428571428571,
+        "recall": 0.75,
+        "f1": 0.7999999999999999,
+        "support": 8
+      }
+    },
+    "confusion": [
+      [
+        8,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        7,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        8,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        1,
+        0,
+        6,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        8,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        8,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        6
+      ]
+    ]
+  },
+  "models_supported": [
+    "tiny",
+    "vgg16",
+    "resnet50",
+    "mobilenet_v2",
+    "efficientnet_b0",
+    "resnet50_cbam"
+  ]
+}

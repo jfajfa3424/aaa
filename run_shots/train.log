@@ -1,0 +1,8 @@
+device=cpu  model=tiny  params=94,728  classes=8
+epoch 001/5  train_loss=1.8602 acc=0.375  val_loss=1.8879 acc=0.464  lr=2.00e-04
+epoch 002/5  train_loss=1.4071 acc=0.595  val_loss=1.3896 acc=0.750  lr=3.00e-04
+epoch 003/5  train_loss=1.1898 acc=0.777  val_loss=1.1593 acc=0.804  lr=4.00e-04
+epoch 004/5  train_loss=1.0571 acc=0.792  val_loss=1.0805 acc=0.875  lr=5.00e-04
+epoch 005/5  train_loss=0.9929 acc=0.792  val_loss=0.9532 acc=0.929  lr=6.00e-04
+best val acc=0.9286  test acc=0.9062
+wrote outputs/demo/best.pt and outputs/demo/history.json

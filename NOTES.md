@@ -8,6 +8,11 @@
 
 论文风长训练图仍在 `figures/`。本次 **真实跑出来的截图** 在 `run_shots/`。
 
+就看两张也行：
+
+- 代码运行中：[`run_shots/shot_running.png`](run_shots/shot_running.png)
+- 代码跑通之后：[`run_shots/shot_success.png`](run_shots/shot_success.png)
+
 ## 1. 环境
 
 | 项 | 值 |

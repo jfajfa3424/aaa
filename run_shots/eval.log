@@ -1,0 +1,7 @@
+{
+  "accuracy": 0.90625,
+  "macro_precision": 0.9154761904761906,
+  "macro_recall": 0.90625,
+  "macro_f1": 0.9055088702147526
+}
+wrote outputs/demo/test_metrics.json

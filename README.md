@@ -26,7 +26,11 @@ Detection boxes in `figures/det_*.png` are real YOLOv8s predictions on the six d
 4. 目标检测训练可视化合集｜Box/Cls/DFL 损失 + PR 曲线 + F1-Confidence
 5. 改进 YOLOv8（BiFPN+CBAM）｜消融实验 + 速度精度对比 + 检测效果
 
-封面图建议用 `figures/23_detection_mosaic.png`，正文轮播训练图 + 单张 `det_*.png`。
+封面图建议用 `figures/23_detection_mosaic.png`。训练图发笔记优先用拼图，不必一张张传：
+
+- `C3_results_2x5.png` YOLO 风格 2×5 训练仪表盘  
+- `C4_training_3x3.png` 九宫格训练板  
+- `C5_eval_2x3.png` 评估六宫格
 
 ## 图片清单
 

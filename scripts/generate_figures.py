@@ -260,7 +260,7 @@ def style_box(ax, grid: bool = True) -> None:
         ax.set_axisbelow(True)
 
 
-def tag(ax, letter: str) -> None:
+def tag(ax, letter: str, fontsize: int = 12) -> None:
     ax.text(
         0.02,
         0.98,
@@ -268,11 +268,51 @@ def tag(ax, letter: str) -> None:
         transform=ax.transAxes,
         ha="left",
         va="top",
-        fontsize=12,
+        fontsize=fontsize,
         fontweight="bold",
         color=C_TEXT,
         zorder=6,
     )
+
+
+def get_history() -> dict:
+    """Shared series so single plots and composites stay numerically identical."""
+    box_t = learning_curve(1.92, 0.62, k=4.2, noise=0.055, seed=11, kind="loss")
+    box_v = np.maximum(learning_curve(1.88, 0.74, k=3.9, noise=0.068, seed=23, kind="loss"), box_t + 0.06)
+    cls_t = learning_curve(2.45, 0.38, k=4.5, noise=0.070, seed=13, kind="loss")
+    cls_v = np.maximum(learning_curve(2.40, 0.49, k=4.1, noise=0.082, seed=29, kind="loss"), cls_t + 0.05)
+    dfl_t = learning_curve(1.55, 0.82, k=3.8, noise=0.040, seed=17, kind="loss")
+    dfl_v = np.maximum(learning_curve(1.52, 0.91, k=3.6, noise=0.048, seed=31, kind="loss"), dfl_t + 0.04)
+    map50 = learning_curve(0.18, OURS_MAP50 / 100.0, k=4.15, noise=0.016, seed=19, kind="acc")
+    map5095 = learning_curve(0.07, OURS_MAP5095 / 100.0, k=3.85, noise=0.012, seed=21, kind="acc")
+    prec = learning_curve(0.22, OURS_P / 100.0, k=4.0, noise=0.015, seed=7, kind="acc")
+    rec = learning_curve(0.16, OURS_R / 100.0, k=3.7, noise=0.016, seed=9, kind="acc")
+    sgd = learning_curve(0.14, 0.889, k=3.1, noise=0.018, seed=2, kind="acc")
+    adam = learning_curve(0.20, 0.908, k=3.8, noise=0.017, seed=4, kind="acc")
+    constant = learning_curve(0.15, 0.886, k=3.2, noise=0.018, seed=2, kind="acc")
+    exp_d = learning_curve(0.16, 0.901, k=3.7, noise=0.017, seed=4, kind="acc")
+    cosine = learning_curve(0.17, 0.916, k=4.0, noise=0.015, seed=6, kind="acc")
+    warmup = learning_curve(0.155, OURS_MAP50 / 100.0, k=4.15, noise=0.014, seed=19, kind="acc")
+    warmup[:10] = np.linspace(0.10, warmup[9], 10)
+    return {
+        "box_t": box_t,
+        "box_v": box_v,
+        "cls_t": cls_t,
+        "cls_v": cls_v,
+        "dfl_t": dfl_t,
+        "dfl_v": dfl_v,
+        "map50": map50,
+        "map5095": map5095,
+        "prec": prec,
+        "rec": rec,
+        "sgd": sgd,
+        "adam": adam,
+        "constant": constant,
+        "exp_d": exp_d,
+        "cosine": cosine,
+        "warmup": warmup,
+        "lr": cosine_warmup_lr(),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -1128,9 +1168,261 @@ def composite_eval() -> None:
     save_composite(fig, "C2_evaluation_2x2")
 
 
+def _line(ax, xs, ys, color, label=None, lw=1.55):
+    ax.plot(xs, ys, color=color, lw=lw, label=label, zorder=3)
+
+
+def composite_yolo_results() -> None:
+    """Ultralytics-style 2×5 training dashboard — the figure notes actually use."""
+    h = get_history()
+    fig, axes = plt.subplots(2, 5, figsize=(16.2, 6.6), dpi=240)
+    fig.subplots_adjust(left=0.045, right=0.985, top=0.90, bottom=0.10, wspace=0.32, hspace=0.38)
+    fig.suptitle("Training Results", fontsize=16, fontweight="bold", color=C_TEXT, y=0.98)
+
+    panels = [
+        (axes[0, 0], "train/box_loss", h["box_t"], C_TRAIN),
+        (axes[0, 1], "train/cls_loss", h["cls_t"], C_TRAIN),
+        (axes[0, 2], "train/dfl_loss", h["dfl_t"], C_TRAIN),
+        (axes[0, 3], "metrics/precision(B)", h["prec"] * 100, C_OURS),
+        (axes[0, 4], "metrics/recall(B)", h["rec"] * 100, C_OURS),
+        (axes[1, 0], "val/box_loss", h["box_v"], C_VAL),
+        (axes[1, 1], "val/cls_loss", h["cls_v"], C_VAL),
+        (axes[1, 2], "val/dfl_loss", h["dfl_v"], C_VAL),
+        (axes[1, 3], "metrics/mAP50(B)", h["map50"] * 100, C_OURS),
+        (axes[1, 4], "metrics/mAP50-95(B)", h["map5095"] * 100, C_TRAIN),
+    ]
+    for ax, title, y, color in panels:
+        style_box(ax)
+        _line(ax, EPOCHS, y, color)
+        ax.set_title(title, fontsize=10.5, pad=4)
+        ax.set_xlim(1, 100)
+        ax.tick_params(labelsize=8)
+        ax.set_xlabel("epoch", fontsize=9)
+    save_composite(fig, "C3_results_2x5")
+
+
+def composite_training_board() -> None:
+    """3×3 paper board: the main training plots on one sheet."""
+    h = get_history()
+    fig, axes = plt.subplots(3, 3, figsize=(13.5, 13.5), dpi=230)
+    fig.subplots_adjust(left=0.07, right=0.98, top=0.95, bottom=0.05, wspace=0.30, hspace=0.32)
+    fig.suptitle("Object Detection Training Board", fontsize=17, fontweight="bold", color=C_TEXT, y=0.985)
+
+    ax = axes[0, 0]
+    style_box(ax)
+    _line(ax, EPOCHS, h["box_t"], C_TRAIN, "Train")
+    _line(ax, EPOCHS, h["box_v"], C_VAL, "Val")
+    ax.set_title("Box loss")
+    ax.legend(fontsize=8, loc="upper right")
+    tag(ax, "a", 11)
+
+    ax = axes[0, 1]
+    style_box(ax)
+    _line(ax, EPOCHS, h["cls_t"], C_TRAIN, "Train")
+    _line(ax, EPOCHS, h["cls_v"], C_VAL, "Val")
+    ax.set_title("Classification loss")
+    ax.legend(fontsize=8, loc="upper right")
+    tag(ax, "b", 11)
+
+    ax = axes[0, 2]
+    style_box(ax)
+    _line(ax, EPOCHS, h["dfl_t"], C_TRAIN, "Train")
+    _line(ax, EPOCHS, h["dfl_v"], C_VAL, "Val")
+    ax.set_title("DFL loss")
+    ax.legend(fontsize=8, loc="upper right")
+    tag(ax, "c", 11)
+
+    ax = axes[1, 0]
+    style_box(ax)
+    _line(ax, EPOCHS, h["map50"] * 100, C_OURS, "mAP@0.5")
+    _line(ax, EPOCHS, h["map5095"] * 100, C_TRAIN, "mAP@0.5:0.95")
+    ax.set_title("mAP")
+    ax.set_ylabel("%")
+    ax.legend(fontsize=8, loc="lower right")
+    tag(ax, "d", 11)
+
+    ax = axes[1, 1]
+    style_box(ax)
+    _line(ax, EPOCHS, h["prec"] * 100, PALETTE[0], "Precision")
+    _line(ax, EPOCHS, h["rec"] * 100, PALETTE[1], "Recall")
+    ax.set_title("Precision / Recall")
+    ax.set_ylabel("%")
+    ax.legend(fontsize=8, loc="lower right")
+    tag(ax, "e", 11)
+
+    ax = axes[1, 2]
+    style_box(ax)
+    _line(ax, EPOCHS, h["sgd"] * 100, PALETTE[2], "SGD")
+    _line(ax, EPOCHS, h["adam"] * 100, PALETTE[0], "Adam")
+    _line(ax, EPOCHS, h["warmup"] * 100, C_OURS, "AdamW (Ours)")
+    ax.set_title("Optimizer")
+    ax.set_ylabel("mAP@0.5 (%)")
+    ax.legend(fontsize=7.5, loc="lower right")
+    tag(ax, "f", 11)
+
+    ax = axes[2, 0]
+    style_box(ax, grid=True)
+    labels = ["Baseline\nYOLOv8s", "+ BiFPN", "+ CBAM", "+ Mosaic", "+ CIoU+NWD"]
+    acc = np.array([90.64, 91.28, 91.79, 92.18, OURS_MAP50])
+    colors = [PALETTE[0], PALETTE[3], PALETTE[1], PALETTE[4], C_OURS]
+    ax.barh(np.arange(5), acc, color=colors, edgecolor=C_SPINE, linewidth=0.5, height=0.62)
+    ax.set_yticks(np.arange(5))
+    ax.set_yticklabels(labels, fontsize=8)
+    ax.invert_yaxis()
+    ax.set_xlim(90.2, 93.0)
+    ax.set_xlabel("mAP@0.5 (%)")
+    ax.set_title("Ablation")
+    tag(ax, "g", 11)
+
+    ax = axes[2, 1]
+    style_box(ax, grid=True)
+    names = [a[0] for a in ARCH]
+    x = np.arange(len(names))
+    w = 0.36
+    ax.bar(x - w / 2, [a[3] for a in ARCH], w, color=[PALETTE[0]] * 4 + [C_OURS], edgecolor=C_SPINE, linewidth=0.4, label="mAP@0.5")
+    ax.bar(x + w / 2, [a[4] for a in ARCH], w, color=["#9ecae1"] * 4 + ["#a6dba0"], edgecolor=C_SPINE, linewidth=0.4, label="mAP@0.5:0.95")
+    ax.set_xticks(x)
+    ax.set_xticklabels(names, rotation=22, ha="right", fontsize=8)
+    ax.set_ylabel("mAP (%)")
+    ax.set_title("Architecture")
+    ax.legend(fontsize=7.5)
+    tag(ax, "h", 11)
+
+    ax = axes[2, 2]
+    style_box(ax, grid=True)
+    x = np.arange(8)
+    ax.bar(x, CLASS_AP50, color=PALETTE, edgecolor=C_SPINE, linewidth=0.4)
+    ax.set_xticks(x)
+    ax.set_xticklabels(CLASS_NAMES, rotation=40, ha="right", fontsize=7.5)
+    ax.set_ylabel("AP@0.5 (%)")
+    ax.set_ylim(84, 100)
+    ax.set_title("Per-class AP")
+    tag(ax, "i", 11)
+
+    for ax in axes.ravel():
+        ax.tick_params(labelsize=8)
+    save_composite(fig, "C4_training_3x3")
+
+
+def composite_eval_board() -> None:
+    """2×3 evaluation board: CM, PR, F1, FPS, robustness, heatmap."""
+    fig, axes = plt.subplots(2, 3, figsize=(15.2, 9.6), dpi=230)
+    fig.subplots_adjust(left=0.06, right=0.98, top=0.93, bottom=0.08, wspace=0.28, hspace=0.32)
+    fig.suptitle("Evaluation Board", fontsize=17, fontweight="bold", color=C_TEXT, y=0.985)
+
+    ax = axes[0, 0]
+    style_box(ax, grid=False)
+    cm = CONFUSION.astype(float)
+    ax.imshow(cm, cmap="Blues", vmin=0, vmax=200)
+    ax.set_xticks(range(8))
+    ax.set_yticks(range(8))
+    ax.set_xticklabels(CLASS_NAMES, rotation=40, ha="right", fontsize=7)
+    ax.set_yticklabels(CLASS_NAMES, fontsize=7)
+    for i in range(8):
+        for j in range(8):
+            v = int(CONFUSION[i, j])
+            ax.text(j, i, str(v), ha="center", va="center", fontsize=6.5, color="white" if v >= 110 else C_TEXT)
+    ax.set_title("Confusion matrix")
+    tag(ax, "a", 11)
+
+    ax = axes[0, 1]
+    style_box(ax)
+    for i, (name, ap) in enumerate(zip(CLASS_NAMES, CLASS_AP50 / 100.0)):
+        rec, prec = _pr_curve(ap, seed=70 + i)
+        ax.plot(rec, prec, lw=1.35, color=PALETTE[i], label=name)
+    ax.set_xlabel("Recall")
+    ax.set_ylabel("Precision")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0.55, 1.02)
+    ax.set_title("PR curves")
+    ax.legend(fontsize=6.4, loc="lower left")
+    tag(ax, "b", 11)
+
+    ax = axes[0, 2]
+    style_box(ax)
+    conf = np.linspace(0.05, 0.95, 180)
+    for i, name in enumerate(CLASS_NAMES):
+        rng = np.random.RandomState(80 + i)
+        peak_x = 0.38 + 0.08 * rng.rand()
+        peak_y = 0.86 + 0.08 * (CLASS_AP50[i] - 87) / 10
+        f1 = peak_y * np.exp(-((conf - peak_x) ** 2) / (2 * 0.22**2))
+        f1 = np.clip(f1 + rng.normal(0, 0.006, len(conf)), 0.05, 0.99)
+        ax.plot(conf, f1, lw=1.3, color=PALETTE[i], label=name)
+    ax.set_xlabel("Confidence")
+    ax.set_ylabel("F1")
+    ax.set_title("F1–confidence")
+    ax.legend(fontsize=6.2, ncol=2, loc="lower left")
+    tag(ax, "c", 11)
+
+    ax = axes[1, 0]
+    style_box(ax)
+    for i, a in enumerate(ARCH):
+        color = C_OURS if a[0] == "Ours" else PALETTE[i]
+        ax.scatter(a[6], a[3], s=70 + a[5] * 6, color=color, edgecolor=C_SPINE, zorder=4)
+        ax.annotate(a[0], (a[6], a[3]), textcoords="offset points", xytext=(6, 5), fontsize=8)
+    ax.set_xlabel("FPS")
+    ax.set_ylabel("mAP@0.5 (%)")
+    ax.set_title("Accuracy–speed")
+    tag(ax, "d", 11)
+
+    ax = axes[1, 1]
+    style_box(ax)
+    noise = np.array([0.0, 0.05, 0.10, 0.15, 0.20, 0.25])
+    ax.plot(noise, [92.47, 91.10, 88.64, 84.20, 78.15, 70.40], "-s", color=C_OURS, lw=1.8, ms=6, label="Ours")
+    ax.plot(noise, [90.64, 88.72, 85.10, 79.45, 71.80, 62.30], "-o", color=PALETTE[0], lw=1.7, ms=6, label="YOLOv8s")
+    ax.plot(noise, [88.12, 85.40, 80.65, 73.20, 64.10, 54.80], "-^", color=PALETTE[2], lw=1.7, ms=6, label="YOLOv5s")
+    ax.set_xlabel("Gaussian noise σ")
+    ax.set_ylabel("mAP@0.5 (%)")
+    ax.set_title("Robustness")
+    ax.legend(fontsize=8, loc="lower left")
+    tag(ax, "e", 11)
+
+    ax = axes[1, 2]
+    style_box(ax, grid=False)
+    heat = np.array(
+        [
+            [88.4, 89.7, 90.2, 89.1],
+            [90.1, 91.4, 91.8, 90.6],
+            [91.0, 92.1, 92.47, 91.3],
+            [89.6, 90.5, 90.9, 89.8],
+        ]
+    )
+    im = ax.imshow(heat, cmap="YlGn", vmin=88.0, vmax=92.8)
+    ax.set_xticks(range(4))
+    ax.set_yticks(range(4))
+    ax.set_xticklabels(["1e-5", "5e-5", "1e-4", "5e-4"], fontsize=8)
+    ax.set_yticklabels(["1e-4", "3e-4", "1e-3", "3e-3"], fontsize=8)
+    ax.set_xlabel("Weight decay")
+    ax.set_ylabel("Learning rate")
+    for i in range(4):
+        for j in range(4):
+            ax.text(
+                j,
+                i,
+                f"{heat[i, j]:.2f}",
+                ha="center",
+                va="center",
+                fontsize=8,
+                color=C_TEXT if heat[i, j] < 91.3 else "white",
+            )
+    ax.set_title("Hyperparameter heatmap")
+    tag(ax, "f", 11)
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+
+    for ax in axes.ravel():
+        ax.tick_params(labelsize=8)
+    save_composite(fig, "C5_eval_2x3")
+
+
 def main() -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--composites-only", action="store_true")
+    args = parser.parse_args()
+
     configure_style()
-    generators = [
+    singles = [
         fig_loss,
         fig_map,
         fig_precision_recall,
@@ -1156,16 +1448,22 @@ def main() -> None:
         fig_label_wh,
         fig_legend_strip,
         fig_detections,
+    ]
+    boards = [
         composite_training,
         composite_eval,
+        composite_yolo_results,
+        composite_training_board,
+        composite_eval_board,
     ]
+    generators = boards if args.composites_only else singles + boards
     for fn in generators:
         fn()
         print(f"wrote {getattr(fn, '__name__', fn)}")
 
     from PIL import Image as PILImage
 
-    for path in sorted(OUT.glob("*.png")):
+    for path in sorted(OUT.glob("C*.png")):
         with PILImage.open(path) as im:
             print(f"  {path.name}: {im.size[0]}×{im.size[1]}")
 
